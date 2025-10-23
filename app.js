@@ -1,15 +1,21 @@
 const $ = sel => document.querySelector(sel);
 
+function setStatus(msg){ const el = $('#status'); if (el) el.textContent = msg; }
+
+async function detectSupport() {
+  const supportsSW = 'serviceWorker' in navigator;
+  const supportsNotif = 'Notification' in window;
+  const supportsTriggers = 'showTrigger' in Notification.prototype && 'TimestampTrigger' in window;
+  let scopeHint = location.pathname.replace(/\/[^\/?#]*$/, '/'); // '/betterdays/' on GH Pages
+  return { supportsSW, supportsNotif, supportsTriggers, scopeHint };
+}
+
 const state = {
   pillTime: localStorage.getItem('pillTime') || '07:30',
   dailyReminder: localStorage.getItem('dailyReminder') === 'true',
 };
 
 function pad(n){ return (n<10? '0':'') + n; }
-
-function localTimeStr(date) {
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 
 function nextOccurrenceTodayOrTomorrow(timeStr) {
   const [h, m] = timeStr.split(':').map(x=>parseInt(x,10));
@@ -21,12 +27,16 @@ function nextOccurrenceTodayOrTomorrow(timeStr) {
 }
 
 async function ensurePermissions() {
-  if (!('Notification' in window)) {
-    alert('Este dispositivo no soporta notificaciones web.');
+  const info = await detectSupport();
+  if (!info.supportsNotif) {
+    alert('Este navegador no soporta notificaciones web. Usa el botón .ics para recordatorios nativos.');
     return false;
   }
   if (Notification.permission === 'granted') return true;
   const perm = await Notification.requestPermission();
+  if (perm !== 'granted') {
+    alert('Notificaciones bloqueadas. Usa el botón .ics para agregar recordatorios al Calendario.');
+  }
   return perm === 'granted';
 }
 
@@ -38,12 +48,11 @@ function showLocalNotification(title, body) {
   }
 }
 
-// Chromium-only Scheduled Triggers
 async function scheduleTrigger(when, title, body) {
   try {
     const reg = await navigator.serviceWorker.getRegistration();
     if (!('showTrigger' in Notification.prototype) || !window.TimestampTrigger || !reg) {
-      return false; // fallback will be used
+      return false;
     }
     await reg.showNotification(title, {
       body,
@@ -63,12 +72,11 @@ function scheduleSupplementPlus4h() {
   scheduleTrigger(when, 'Suplementos (+4h)', 'Hierro/calcio/biotina: ya puedes tomarlos.')
     .then(scheduled => {
       if (!scheduled) {
-        // Fallback: simple timeout while app stays open
         const ms = when.getTime() - Date.now();
         setTimeout(() => showLocalNotification('Suplementos (+4h)', 'Hierro/calcio/biotina: ya puedes tomarlos.'), ms);
       }
     });
-  $('#status').textContent = `Recordatorio de suplementos programado para hoy a las ${when.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}.`;
+  setStatus(`Recordatorio de suplementos programado para hoy a las ${when.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}. Si las notificaciones en background no están disponibles, deja la app abierta o usa el botón .ics.`);
 }
 
 function scheduleDailyPillReminder() {
@@ -77,26 +85,23 @@ function scheduleDailyPillReminder() {
   const next = nextOccurrenceTodayOrTomorrow(state.pillTime);
   scheduleTrigger(next, 'Eutirox', 'Toma tu Eutirox en ayunas con agua.')
     .then(scheduled => {
-      $('#status').textContent = scheduled
+      setStatus(scheduled
         ? `Recordatorio diario preparado para las ${state.pillTime}.`
-        : `Recordatorio listo (si el navegador no soporta programación en segundo plano, mantén la app abierta).`;
+        : `Recordatorio listo (si el navegador no soporta programación en segundo plano, mantén la app abierta o usa el botón .ics).`);
     });
 }
 
 function cancelDaily() {
   localStorage.setItem('dailyReminder', 'false');
-  $('#status').textContent = 'Recordatorio diario desactivado.';
+  setStatus('Recordatorio diario desactivado.');
 }
 
 function exportICS({ title, description, start, durationMinutes, rrule }) {
-  const dt = (d)=>{
-    const z = new Date(d);
-    // naive local -> floating time for calendar apps
-    return z.getFullYear().toString() +
-      pad(z.getMonth()+1) + pad(z.getDate()) + 'T' +
-      pad(z.getHours()) + pad(z.getMinutes()) + '00';
-  };
-  const uid = crypto.randomUUID();
+  function pad2(n) { return (n<10?'0':'') + n; }
+  function dt(d){
+    return d.getFullYear().toString()+pad2(d.getMonth()+1)+pad2(d.getDate())+'T'+pad2(d.getHours())+pad2(d.getMinutes())+'00';
+  }
+  const uid = (Math.random().toString(36).slice(2)) + '@bestielegend';
   let ics = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//BestieLegend//ThyroidBuddy//ES\n';
   ics += 'BEGIN:VEVENT\n';
   ics += `UID:${uid}\n`;
@@ -120,7 +125,7 @@ function exportICS({ title, description, start, durationMinutes, rrule }) {
 }
 
 function createICSReminders() {
-  // 1) Daily supplements at pillTime+4h
+  setStatus('Generando eventos .ics…');
   const [h, m] = state.pillTime.split(':').map(n=>parseInt(n,10));
   const start = new Date();
   start.setHours(h+4, m, 0, 0);
@@ -132,18 +137,17 @@ function createICSReminders() {
     durationMinutes: 5,
     rrule: 'FREQ=DAILY'
   });
-
-  // 2) Thyroid labs every 6 months (rough cadence)
   const labs = new Date();
   labs.setMonth(labs.getMonth()+6);
   labs.setHours(9,0,0,0);
   exportICS({
     title: 'Recordar laboratorios TSH ± T4',
-    description: 'Programar/realizar labs de tiroides; si hubo ajuste de dosis, hacerlo 6–8 semanas después del cambio.',
+    description: 'Programar/realizar labs; si hubo ajuste de dosis, hacerlo 6–8 semanas después del cambio.',
     start: labs,
     durationMinutes: 30,
     rrule: 'FREQ=MONTHLY;INTERVAL=6'
   });
+  setTimeout(()=>setStatus('Eventos .ics generados. Ábrelos para agregarlos al Calendario (iPhone/Mac).'), 400);
 }
 
 function initUI() {
@@ -174,13 +178,17 @@ function initUI() {
 }
 
 window.addEventListener('load', async ()=>{
-  if ('serviceWorker' in navigator) {
+  const info = await detectSupport();
+  if (info.supportsSW) {
     try {
-      await navigator.serviceWorker.register('./sw.js');
-      console.log('SW registered');
+      const swPath = info.scopeHint + 'sw.js';
+      await navigator.serviceWorker.register(swPath, { scope: info.scopeHint });
+      console.log('SW registered at', swPath, 'scope', info.scopeHint);
     } catch(e) {
       console.log('SW registration failed', e);
     }
+  } else {
+    console.log('Service Worker no soportado');
   }
   initUI();
 });

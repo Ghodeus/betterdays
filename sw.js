@@ -1,5 +1,5 @@
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open('bestie-thyroid-v1').then(cache => cache.addAll([
+  event.waitUntil(caches.open('bestie-thyroid-v2').then(cache => cache.addAll([
     './',
     './index.html',
     './styles.css',

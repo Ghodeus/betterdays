@@ -1,37 +1,21 @@
 :root {
   --bg: #ffffff;
-  --fg: #0f172a; /* slate-900 */
-  --muted: #475569; /* slate-600 */
-  --accent: #4f46e5; /* indigo-600 */
-  --accent2: #db2777; /* pink-600 */
-  --card: #f8fafc; /* slate-50 */
-  --border: #e2e8f0; /* slate-200 */
+  --fg: #0f172a;
+  --muted: #475569;
+  --accent: #4f46e5;
+  --accent2: #db2777;
+  --card: #f8fafc;
+  --border: #e2e8f0;
 }
 * { box-sizing: border-box }
-body {
-  margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-  color: var(--fg); background: var(--bg);
-}
-.container {
-  max-width: 720px; margin: 0 auto; padding: 24px;
-}
-.card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px;
-  box-shadow: 0 4px 20px rgba(2,6,23,0.06);
-}
+body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: var(--fg); background: var(--bg); }
+.container { max-width: 720px; margin: 0 auto; padding: 24px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(2,6,23,0.06); }
 h1 { font-size: 1.4rem; margin: 0 0 10px }
 h2 { font-size: 1.1rem; margin: 0 0 12px }
 label { font-weight: 600; font-size: 0.95rem }
-input[type="time"], input[type="date"] {
-  padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; width: 180px;
-}
-select, input[type="number"] {
-  padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
-}
-button {
-  padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--accent); color: white; font-weight: 700; cursor: pointer;
-}
+input[type="time"] { padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; width: 180px; }
+button { padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--accent); color: white; font-weight: 700; cursor: pointer; }
 button.secondary { background: var(--accent2) }
 button.ghost { background: transparent; color: var(--fg) }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap }
