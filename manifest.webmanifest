@@ -1,7 +1,7 @@
 {
-  "name": "Bestie Legend: Thyroid Companion",
-  "short_name": "Thyroid Buddy",
-  "description": "Lightweight helper for Eutirox timing, +4h supplement reminders, and 6–8wk/6–12mo lab nudges.",
+  "name": "Bestie Legend: Wellness Companion",
+  "short_name": "Wellness Buddy",
+  "description": "Lightweight helper for Eutirox timing, +4h supplement reminders, diet and exercise and 6–8wk/6–12mo lab nudges.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
@@ -18,5 +18,7 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ]
+}
   ]
 }
