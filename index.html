@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bestie Legend · Thyroid Companion</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Bestie Legend · Thyroid Companion <span class="badge">PWA</span></h1>
+      <p class="help">Recordatorios para Eutirox y suplementos +4h. Funciona offline tras instalarla. En iPhone: Compartir → “Añadir a pantalla de inicio”. En Mac/Chrome: icono de instalar.</p>
+      <div class="row">
+        <button id="btnNotify">Permitir notificaciones</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>1) Horario base</h2>
+      <div class="row">
+        <label for="pillTime">Hora típica de Eutirox:</label>
+        <input type="time" id="pillTime" value="07:30">
+        <button id="btnDaily">Activar recordatorio diario</button>
+        <button class="ghost" id="btnCancelDaily">Desactivar</button>
+      </div>
+      <p class="help small">Recibirás un aviso cada día a esta hora para tomar Eutirox en ayunas.</p>
+    </div>
+
+    <div class="card">
+      <h2>2) Hoy ya tomamos Eutirox</h2>
+      <div class="row">
+        <button class="secondary" id="btnPlus4">Programar suplementos (+4h)</button>
+      </div>
+      <p class="help small">Crea un recordatorio puntual hoy para hierro/calcio/biotina a +4h.</p>
+    </div>
+
+    <div class="card">
+      <h2>3) Calendario (compatibilidad total)</h2>
+      <div class="row">
+        <button class="ghost" id="btnICS">Crear eventos .ics</button>
+      </div>
+      <p class="help small">Si tu dispositivo limita notificaciones web en segundo plano, añade estos eventos al Calendario/Recordatorios.</p>
+    </div>
+
+    <div class="card">
+      <strong>Estado:</strong> <span id="status">Listo.</span>
+    </div>
+
+    <footer>Hecho con ❤️ por Bestie Legend. Esto no reemplaza a tu médico.</footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
